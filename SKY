@@ -1,0 +1,38 @@
+local Players = game:GetService("Players") 
+local Lighting = game:GetService("Lighting") 
+local player = Players.LocalPlayer
+
+local character = player.Character or player.CharacterAdded:Wait() 
+local shirt = character:WaitForChild("Shirt", 5)
+
+for _, obj in pairs(Lighting:GetChildren()) do 
+	if obj:IsA("Sky") then 
+		obj:Destroy() 
+	end 
+end
+
+local sky = Instance.new("Sky") 
+sky.Parent = Lighting
+
+if shirt and shirt.ShirtTemplate ~= "" then 
+	local shirtID = shirt.ShirtTemplate
+	local success = pcall(function() 
+	sky.SkyboxBk = shirtID 
+	sky.SkyboxDn = shirtID 
+	sky.SkyboxFt = shirtID 
+	sky.SkyboxLf = shirtID 
+	sky.SkyboxRt = shirtID 
+	sky.SkyboxUp = shirtID 
+	end)
+
+	if not success then 
+		warn("التيشيرت شفاف أو ما يشتغل، بحط لون بديل") 
+	Lighting.Ambient = Color3.fromRGB(150, 120, 100) 
+	end 
+else 
+	warn("ما لقيت تيشيرت، بحط لون بديل") 
+	Lighting.Ambient = Color3.fromRGB(150, 120, 100) 
+end
+
+Lighting.ClockTime = 12 
+Lighting.Brightness = 2
