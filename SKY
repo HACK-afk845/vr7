@@ -1,38 +1,32 @@
-local Players = game:GetService("Players") 
-local Lighting = game:GetService("Lighting") 
-local player = Players.LocalPlayer
+local Lighting = game:GetService("Lighting")
+local Players = game:GetService("Players")
+local localPlayer = Players.LocalPlayer
 
-local character = player.Character or player.CharacterAdded:Wait() 
-local shirt = character:WaitForChild("Shirt", 5)
-
-for _, obj in pairs(Lighting:GetChildren()) do 
-	if obj:IsA("Sky") then 
-		obj:Destroy() 
-	end 
+-- 1. مسح السماء القديمة لمنع التداخل
+for _, child in pairs(Lighting:GetChildren()) do
+    if child:IsA("Sky") then
+        child:Destroy()
+    end
 end
 
-local sky = Instance.new("Sky") 
-sky.Parent = Lighting
+-- 2. جلب رابط صورة الأفتار الخاص بك (رأس وصدر)
+local userId = localPlayer.UserId
+local thumbType = Enum.ThumbnailType.AvatarThumbnail
+local thumbSize = Enum.ThumbnailSize.Size420x420
+local avatarAssetId, isReady = Players:GetUserThumbnailAsync(userId, thumbType, thumbSize)
 
-if shirt and shirt.ShirtTemplate ~= "" then 
-	local shirtID = shirt.ShirtTemplate
-	local success = pcall(function() 
-	sky.SkyboxBk = shirtID 
-	sky.SkyboxDn = shirtID 
-	sky.SkyboxFt = shirtID 
-	sky.SkyboxLf = shirtID 
-	sky.SkyboxRt = shirtID 
-	sky.SkyboxUp = shirtID 
-	end)
-
-	if not success then 
-		warn("التيشيرت شفاف أو ما يشتغل، بحط لون بديل") 
-	Lighting.Ambient = Color3.fromRGB(150, 120, 100) 
-	end 
-else 
-	warn("ما لقيت تيشيرت، بحط لون بديل") 
-	Lighting.Ambient = Color3.fromRGB(150, 120, 100) 
+-- 3. إنشاء سماء جديدة وتطبيق صورتك عليها
+if isReady then
+    local newSky = Instance.new("Sky", Lighting)
+    newSky.SkyboxBk = avatarAssetId
+    newSky.SkyboxDn = avatarAssetId
+    newSky.SkyboxFt = avatarAssetId
+    newSky.SkyboxLf = avatarAssetId
+    newSky.SkyboxRt = avatarAssetId
+    newSky.SkyboxUp = avatarAssetId
+    
+    -- إزالة التأثيرات الافتراضية لزيادة وضوح الصورة
+    Lighting.CelestialBodiesShown = false
+else
+    warn("فشل في جلب صورة الأفتار، تأكد من اتصالك بالإنترنت.")
 end
-
-Lighting.ClockTime = 12 
-Lighting.Brightness = 2
